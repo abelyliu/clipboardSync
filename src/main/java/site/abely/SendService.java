@@ -29,8 +29,12 @@ public class SendService {
             if (files != null) {
                 socket2.connect(socketAddress2);
                 OutputStream outputStream2 = socket.getOutputStream();
+                byte[] size = ByteBuffer.allocate(4).putInt(files.length).array();
+                outputStream2.write(size);
                 outputStream2.write(files);
                 outputStream2.flush();
+                outputStream2.close();
+
             }
             if (image != null) {
                 socket2.connect(socketAddress2);
