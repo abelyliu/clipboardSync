@@ -3,56 +3,117 @@ package site.abely;
 import com.tulskiy.keymaster.common.HotKeyListener;
 import com.tulskiy.keymaster.common.Provider;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Bootstrap {
     public static void main(String[] args) {
-        new Thread(new SocketServer()).start();
+//        new Thread(new SocketServer()).start();
         new Thread(new SocketFileServer()).start();
         final Provider provider = Provider.getCurrentProvider(true);
         HotKeyListener listener = hotKey -> {
             System.out.println(Thread.currentThread().getId());
-            Object imageFromClipboard = null;
+            ClipInfo imageFromClipboard = null;
             try {
                 imageFromClipboard = getImageFromClipboard();
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (UnsupportedFlavorException e) {
                 e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            if (imageFromClipboard == null) {
+                System.err.println("not support type");
             }
             SendService sendService = new SendService();
-            if (imageFromClipboard instanceof String) {
-                sendService.send(0, (String) imageFromClipboard, null, null);
-            } else if (imageFromClipboard instanceof Tuple) {
-                sendService.send(1, (String) ((Tuple) imageFromClipboard).x, (byte[]) (((Tuple) imageFromClipboard).y), null);
-            } else if (imageFromClipboard instanceof BufferedImage) {
-                sendService.send(2, null, null, (BufferedImage) imageFromClipboard);
-            }
+            sendService.send(imageFromClipboard);
         };
+        //加下面这一行是mac os的问题，加上之后会在dock里面出现个java进程，挺尬的
+        Toolkit.getDefaultToolkit();
         provider.register(KeyStroke.getKeyStroke("alt C"), listener);
     }
 
-    public static Object getImageFromClipboard() throws IOException, UnsupportedFlavorException {
+    public static ClipInfo getImageFromClipboard() throws IOException, UnsupportedFlavorException, ClassNotFoundException {
+
         Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
-        if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
-            return (BufferedImage) transferable.getTransferData(DataFlavor.imageFlavor);
-        } else if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-            String filePath = (String) transferable.getTransferData(DataFlavor.stringFlavor);
+        if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+//            DataFlavor[] transferDataFlavors = transferable.getTransferDataFlavors();
+//            for (DataFlavor transferDataFlavor : transferDataFlavors) {
+//                System.out.println(transferDataFlavors + ":" + transferable.getTransferData(transferDataFlavor));
+//            }
+            DataFlavor dataFlavor = new DataFlavor("text/uri-list; class=java.lang.String; charset=Unicode");
+            String filePath = (String) transferable.getTransferData(dataFlavor);
+            System.out.println("file path is " + filePath);
+
+//            String filePath = (String) transferable.getTransferData(DataFlavor.stringFlavor);
             byte[] bytes = Files.readAllBytes(Paths.get(filePath));
-            return new Tuple<>(filePath, bytes);
+            return new ClipInfo(ClipInfo.FILE, Paths.get(filePath).getFileName().toString(), bytes);
+        } else if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
+            BufferedImage image = getImage((Image) transferable.getTransferData(DataFlavor.imageFlavor));
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", byteArrayOutputStream);
+            return new ClipInfo(ClipInfo.IMAGE, null, byteArrayOutputStream.toByteArray());
         } else if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-            return transferable.getTransferData(DataFlavor.stringFlavor);
+            String transferData = (String) transferable.getTransferData(DataFlavor.stringFlavor);
+            return new ClipInfo(ClipInfo.TEXT, null, transferData.getBytes("utf-8"));
         } else {
             System.err.println("getImageFromClipboard: That wasn't an image!");
         }
         return null;
+    }
+
+    //mac os 会返回MultiResolutionCachedImage，这里先兼容下
+    public static BufferedImage getImage(Image image) {
+        if (image instanceof BufferedImage) return (BufferedImage) image;
+        Lock lock = new ReentrantLock();
+        Condition size = lock.newCondition(), data = lock.newCondition();
+        ImageObserver o = (img, infoflags, x, y, width, height) -> {
+            lock.lock();
+            try {
+                if ((infoflags & ImageObserver.ALLBITS) != 0) {
+                    size.signal();
+                    data.signal();
+                    return false;
+                }
+                if ((infoflags & (ImageObserver.WIDTH | ImageObserver.HEIGHT)) != 0)
+                    size.signal();
+                return true;
+            } finally {
+                lock.unlock();
+            }
+        };
+        BufferedImage bi;
+        lock.lock();
+        try {
+            int width, height = 0;
+            while ((width = image.getWidth(o)) < 0 || (height = image.getHeight(o)) < 0)
+                size.awaitUninterruptibly();
+            bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = bi.createGraphics();
+            try {
+                g.setBackground(new Color(0, true));
+                g.clearRect(0, 0, width, height);
+                while (!g.drawImage(image, 0, 0, o)) data.awaitUninterruptibly();
+            } finally {
+                g.dispose();
+            }
+        } finally {
+            lock.unlock();
+        }
+        return bi;
     }
 }

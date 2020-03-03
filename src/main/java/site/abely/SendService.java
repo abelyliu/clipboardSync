@@ -1,8 +1,5 @@
 package site.abely;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -13,43 +10,32 @@ import java.nio.ByteBuffer;
 public class SendService {
 
 
-    public void send(int type, String context, byte[] files, BufferedImage image) {
+    public void send(ClipInfo info) {
 
         SocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9997);
-        SocketAddress socketAddress2 = new InetSocketAddress("127.0.0.1", 9996);
-        Socket socket = new Socket();
         try {
+            Socket socket = new Socket();
             socket.connect(socketAddress);
             OutputStream outputStream = socket.getOutputStream();
-            StringBuilder sb = new StringBuilder().append(type).append(context);
-            outputStream.write(sb.toString().getBytes());
+            int type = info.getType();
+            byte[] typeInfo = ByteBuffer.allocate(1).put((byte) type).array();
+            byte[] contentLength = ByteBuffer.allocate(4).putInt(info.getContent().length).array();
+            if (type == ClipInfo.TEXT || type == ClipInfo.IMAGE) {
+                outputStream.write(typeInfo);
+                outputStream.write(contentLength);
+                outputStream.write(info.getContent());
+            } else if (type == ClipInfo.FILE) {
+                byte[] fileNameInfo = info.getFileName().getBytes("utf-8");
+                byte[] fileNameLength = ByteBuffer.allocate(4).putInt(fileNameInfo.length).array();
+                outputStream.write(typeInfo);
+                outputStream.write(fileNameLength);
+                outputStream.write(fileNameInfo);
+                outputStream.write(contentLength);
+                outputStream.write(info.getContent());
+            }
             outputStream.flush();
+            outputStream.close();
             socket.close();
-            Socket socket2 = new Socket();
-            if (files != null) {
-                socket2.connect(socketAddress2);
-                OutputStream outputStream2 = socket.getOutputStream();
-                byte[] size = ByteBuffer.allocate(4).putInt(files.length).array();
-                outputStream2.write(size);
-                outputStream2.write(files);
-                outputStream2.flush();
-                outputStream2.close();
-
-            }
-            if (image != null) {
-                socket2.connect(socketAddress2);
-                OutputStream outputStream2 = socket2.getOutputStream();
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                ImageIO.write(image, "png", byteArrayOutputStream);
-                byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
-                outputStream2.write(size);
-                outputStream2.write(byteArrayOutputStream.toByteArray());
-                outputStream2.flush();
-                outputStream2.close();
-            }
-
-
-            socket2.close();
 
         } catch (IOException e) {
             e.printStackTrace();
