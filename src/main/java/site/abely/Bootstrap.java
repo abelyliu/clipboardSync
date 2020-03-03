@@ -12,6 +12,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -51,17 +52,16 @@ public class Bootstrap {
 
         Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
         if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-//            DataFlavor[] transferDataFlavors = transferable.getTransferDataFlavors();
-//            for (DataFlavor transferDataFlavor : transferDataFlavors) {
-//                System.out.println(transferDataFlavors + ":" + transferable.getTransferData(transferDataFlavor));
-//            }
-            DataFlavor dataFlavor = new DataFlavor("text/uri-list; class=java.lang.String; charset=Unicode");
-            String filePath = (String) transferable.getTransferData(dataFlavor);
+            DataFlavor[] transferDataFlavors = transferable.getTransferDataFlavors();
+            for (DataFlavor transferDataFlavor : transferDataFlavors) {
+                System.out.println(transferDataFlavors + ":" + transferable.getTransferData(transferDataFlavor));
+            }
+            java.util.List<File> filePath = (java.util.List<File>) transferable.getTransferData((DataFlavor.javaFileListFlavor));
             System.out.println("file path is " + filePath);
 
 //            String filePath = (String) transferable.getTransferData(DataFlavor.stringFlavor);
-            byte[] bytes = Files.readAllBytes(Paths.get(filePath));
-            return new ClipInfo(ClipInfo.FILE, Paths.get(filePath).getFileName().toString(), bytes);
+            byte[] bytes = Files.readAllBytes(filePath.get(0).toPath());
+            return new ClipInfo(ClipInfo.FILE, filePath.get(0).toPath().getFileName().toString(), bytes);
         } else if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
             BufferedImage image = getImage((Image) transferable.getTransferData(DataFlavor.imageFlavor));
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
