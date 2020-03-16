@@ -2,6 +2,7 @@ package site.abely;
 
 import com.tulskiy.keymaster.common.HotKeyListener;
 import com.tulskiy.keymaster.common.Provider;
+import dorkbox.notify.Notify;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -19,6 +20,8 @@ import java.nio.file.Paths;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static dorkbox.notify.Pos.TOP_RIGHT;
 
 public class Bootstrap {
     public static void main(String[] args) {

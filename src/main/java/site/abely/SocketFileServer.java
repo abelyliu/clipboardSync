@@ -1,6 +1,11 @@
 package site.abely;
 
+import dorkbox.notify.Notify;
+
 import javax.imageio.ImageIO;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -18,6 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+import static dorkbox.notify.Pos.TOP_RIGHT;
+
 public class SocketFileServer implements Runnable {
 
 
@@ -34,25 +41,33 @@ public class SocketFileServer implements Runnable {
         while (true) {
             try {
                 Socket accept = serverSocket.accept();
-                System.out.println("received file");
                 BufferedInputStream bufferedInputStream = new BufferedInputStream(accept.getInputStream());
                 DataInputStream in = new DataInputStream(bufferedInputStream);
                 byte[] typeInfo = new byte[1];
                 in.readFully(typeInfo);
-//                bufferedInputStream.read(typeInfo);
                 int type = ByteBuffer.wrap(typeInfo).get();
-                System.out.println("=====");
-                System.out.println(type);
+                Notify.create()
+                        .title("消息")
+                        .text("收到消息")
+                        .position(TOP_RIGHT)
+                        .hideAfter(500)
+                        .showInformation();
+                Runtime runtime = Runtime.getRuntime();
+                String[] args = { "osascript", "-e", "display notification \"Lorem ipsum dolor sit amet\" with title \"Title\"\n" };
+                Process process = runtime.exec(args);
 
                 if (type == ClipInfo.TEXT || type == ClipInfo.IMAGE) {
                     byte[] contentLengthInfo = new byte[4];
                     in.readFully(contentLengthInfo);
-//                    buffer
-//                    edInputStream.read(contentLengthInfo);
                     int size = ByteBuffer.wrap(contentLengthInfo).asIntBuffer().get();
                     byte[] contentInfo = new byte[size];
                     in.readFully(contentInfo);
                     in.close();
+                    Notify.create()
+                            .title("消息")
+                            .text("文本或图片已复制到剪切板")
+                            .position(TOP_RIGHT)
+                            .showInformation();
 
                     if (type == ClipInfo.TEXT) {
                         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(new String(contentInfo, "utf-8")), null);
@@ -64,7 +79,6 @@ public class SocketFileServer implements Runnable {
                 } else if (type == ClipInfo.FILE) {
                     byte[] nameLengthInfo = new byte[4];
                     in.readFully(nameLengthInfo);
-//                    bufferedInputStream.read(contentLengthInfo);
                     int size = ByteBuffer.wrap(nameLengthInfo).asIntBuffer().get();
                     byte[] nameInfo = new byte[size];
                     in.readFully(nameInfo);
@@ -76,38 +90,22 @@ public class SocketFileServer implements Runnable {
                     byte[] contentInfo = new byte[contentSize];
                     in.readFully(contentInfo);
                     Files.write(Paths.get("/Users/abley/" + name), contentInfo, StandardOpenOption.CREATE_NEW);
+                    Notify.create()
+                            .title("消息")
+                            .text("文件下载完毕")
+                            .position(TOP_RIGHT)
+                            .hideAfter(2000)
+                            .showInformation();
                 }
 
-//                synchronized (SocketFileServer.class) {
-//                if (type == 1) {
-//                    DataInputStream in = new DataInputStream(bufferedInputStream);
-//                    byte[] sizeAr = new byte[4];
-//                    bufferedInputStream.read(sizeAr);
-//                    int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
-//                    System.out.println("size is " + size);
-//                    byte[] imageAr = new byte[size];
-//                    in.readFully(imageAr);
-//                    in.close();
-//
-//                    Files.write(Paths.get("/Users/abley/" + filename), imageAr, StandardOpenOption.CREATE_NEW);
-//
-//                } else if (type == 2) {
-//                    DataInputStream in = new DataInputStream(bufferedInputStream);
-//                    byte[] sizeAr = new byte[4];
-//                    bufferedInputStream.read(sizeAr);
-//                    int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
-//                    System.out.println("size is " + size);
-//                    byte[] imageAr = new byte[size];
-//                    in.readFully(imageAr);
-//                    in.close();
-//                    BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
-//                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new ImageTransferable(image), null);
-//                    System.out.println("copy finish");
-//                }
-//                System.out.println("end file transfer");
-//                }
             } catch (IOException e) {
                 e.printStackTrace();
+                Notify.create()
+                        .title("消息")
+                        .text("文件接收异常，请查看日志")
+                        .position(TOP_RIGHT)
+                        .hideAfter(2000)
+                        .showInformation();
             }
         }
 
