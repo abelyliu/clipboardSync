@@ -39,7 +39,7 @@ public class SocketFileServer implements Runnable {
                 byte[] typeInfo = new byte[1];
                 in.readFully(typeInfo);
                 int type = ByteBuffer.wrap(typeInfo).get();
-                NotificationUtil.notification("消息", "接收到消息");
+                NotificationUtil.notification("消息", "开始接收消息");
                 if (type == ClipInfo.TEXT || type == ClipInfo.IMAGE) {
                     byte[] contentLengthInfo = new byte[4];
                     in.readFully(contentLengthInfo);
@@ -47,7 +47,7 @@ public class SocketFileServer implements Runnable {
                     byte[] contentInfo = new byte[size];
                     in.readFully(contentInfo);
                     in.close();
-                    NotificationUtil.notification("消息", "接收到文本图片消息");
+                    NotificationUtil.notification("消息", "接收到文本图片消息完成");
 
                     if (type == ClipInfo.TEXT) {
                         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(new String(contentInfo, "utf-8")), null);
