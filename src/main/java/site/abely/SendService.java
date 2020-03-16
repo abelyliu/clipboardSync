@@ -38,6 +38,7 @@ public class SendService {
             outputStream.flush();
             outputStream.close();
             socket.close();
+            System.out.println("send success");
         } catch (IOException e) {
             e.printStackTrace();
         }

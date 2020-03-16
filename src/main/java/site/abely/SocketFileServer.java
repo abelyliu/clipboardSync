@@ -72,6 +72,7 @@ public class SocketFileServer implements Runnable {
                     Files.write(Paths.get("/Users/abley/" + name), contentInfo, StandardOpenOption.CREATE_NEW);
                     NotificationUtil.notification("消息", "接收到文件消息");
                 }
+                System.out.println("接收消息完成");
 
             } catch (IOException e) {
                 e.printStackTrace();
