@@ -13,7 +13,8 @@ public class SendService {
     public void send(ClipInfo info) {
 
 //        SocketAddress socketAddress = new InetSocketAddress("192.168.5.88", 9997);
-        SocketAddress socketAddress = new InetSocketAddress("192.168.106.122", 9997);
+//        SocketAddress socketAddress = new InetSocketAddress("192.168.106.122", 9997);
+        SocketAddress socketAddress = new InetSocketAddress("192.168.5.48", 9997);
         try {
             Socket socket = new Socket();
             socket.connect(socketAddress);

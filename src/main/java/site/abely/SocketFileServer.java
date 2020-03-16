@@ -1,11 +1,6 @@
 package site.abely;
 
-import dorkbox.notify.Notify;
-
 import javax.imageio.ImageIO;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -22,8 +17,6 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-
-import static dorkbox.notify.Pos.TOP_RIGHT;
 
 public class SocketFileServer implements Runnable {
 
@@ -46,16 +39,7 @@ public class SocketFileServer implements Runnable {
                 byte[] typeInfo = new byte[1];
                 in.readFully(typeInfo);
                 int type = ByteBuffer.wrap(typeInfo).get();
-                Notify.create()
-                        .title("消息")
-                        .text("收到消息")
-                        .position(TOP_RIGHT)
-                        .hideAfter(500)
-                        .showInformation();
-                Runtime runtime = Runtime.getRuntime();
-                String[] args = { "osascript", "-e", "display notification \"Lorem ipsum dolor sit amet\" with title \"Title\"\n" };
-                Process process = runtime.exec(args);
-
+                NotificationUtil.notification("消息", "接收到消息");
                 if (type == ClipInfo.TEXT || type == ClipInfo.IMAGE) {
                     byte[] contentLengthInfo = new byte[4];
                     in.readFully(contentLengthInfo);
@@ -63,11 +47,7 @@ public class SocketFileServer implements Runnable {
                     byte[] contentInfo = new byte[size];
                     in.readFully(contentInfo);
                     in.close();
-                    Notify.create()
-                            .title("消息")
-                            .text("文本或图片已复制到剪切板")
-                            .position(TOP_RIGHT)
-                            .showInformation();
+                    NotificationUtil.notification("消息", "接收到文本图片消息");
 
                     if (type == ClipInfo.TEXT) {
                         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(new String(contentInfo, "utf-8")), null);
@@ -90,22 +70,12 @@ public class SocketFileServer implements Runnable {
                     byte[] contentInfo = new byte[contentSize];
                     in.readFully(contentInfo);
                     Files.write(Paths.get("/Users/abley/" + name), contentInfo, StandardOpenOption.CREATE_NEW);
-                    Notify.create()
-                            .title("消息")
-                            .text("文件下载完毕")
-                            .position(TOP_RIGHT)
-                            .hideAfter(2000)
-                            .showInformation();
+                    NotificationUtil.notification("消息", "接收到文件消息");
                 }
 
             } catch (IOException e) {
                 e.printStackTrace();
-                Notify.create()
-                        .title("消息")
-                        .text("文件接收异常，请查看日志")
-                        .position(TOP_RIGHT)
-                        .hideAfter(2000)
-                        .showInformation();
+                NotificationUtil.notification("消息", "接收消息异常");
             }
         }
 
