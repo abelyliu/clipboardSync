@@ -24,7 +24,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import static dorkbox.notify.Pos.TOP_RIGHT;
 
 public class Bootstrap {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws AWTException {
+        Bootstrap td = new Bootstrap();
+        td.displayTray();
+
 //        new Thread(new SocketServer()).start();
         new Thread(new SocketFileServer()).start();
         final Provider provider = Provider.getCurrentProvider(true);
@@ -49,6 +52,26 @@ public class Bootstrap {
         //加下面这一行是mac os的问题，加上之后会在dock里面出现个java进程，挺尬的
         Toolkit.getDefaultToolkit();
         provider.register(KeyStroke.getKeyStroke("alt C"), listener);
+    }
+
+
+    public void displayTray() throws AWTException {
+        //Obtain only one instance of the SystemTray object
+        SystemTray tray = SystemTray.getSystemTray();
+
+        //If the icon is a file
+        Image image = Toolkit.getDefaultToolkit().createImage("icon.png");
+        //Alternative (if the icon is on the classpath):
+        //Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource("icon.png"));
+
+        TrayIcon trayIcon = new TrayIcon(image, "Tray Demo");
+        //Let the system resize the image if needed
+        trayIcon.setImageAutoSize(true);
+        //Set tooltip text for the tray icon
+        trayIcon.setToolTip("System tray icon demo");
+        tray.add(trayIcon);
+
+        trayIcon.displayMessage("Hello, World", "notification demo", TrayIcon.MessageType.INFO);
     }
 
     public static ClipInfo getImageFromClipboard() throws IOException, UnsupportedFlavorException, ClassNotFoundException {
