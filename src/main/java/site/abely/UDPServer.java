@@ -17,7 +17,6 @@ public class UDPServer {
                 byte[] buf = new byte[1024];//存储发来的消息
                 StringBuffer sbuf = new StringBuffer();
                 try {
-                    System.out.println();
                     //绑定端口的
                     ds = new DatagramSocket(port);
                     dp = new DatagramPacket(buf, buf.length);
