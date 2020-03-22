@@ -34,8 +34,6 @@ public class Bootstrap {
                 e.printStackTrace();
             } catch (UnsupportedFlavorException e) {
                 e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
             }
             if (imageFromClipboard == null) {
                 System.err.println("not support type");
@@ -48,14 +46,11 @@ public class Bootstrap {
         provider.register(KeyStroke.getKeyStroke("alt C"), listener);
     }
 
-    public static ClipInfo getImageFromClipboard() throws IOException, UnsupportedFlavorException, ClassNotFoundException {
-
+    public static ClipInfo getImageFromClipboard() throws IOException, UnsupportedFlavorException {
         Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
         if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-            DataFlavor[] transferDataFlavors = transferable.getTransferDataFlavors();
             java.util.List<File> filePath = (java.util.List<File>) transferable.getTransferData((DataFlavor.javaFileListFlavor));
             System.out.println("file path is " + filePath);
-
             byte[] bytes = Files.readAllBytes(filePath.get(0).toPath());
             return new ClipInfo(ClipInfo.FILE, filePath.get(0).toPath().getFileName().toString(), bytes);
         } else if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
@@ -67,7 +62,7 @@ public class Bootstrap {
             String transferData = (String) transferable.getTransferData(DataFlavor.stringFlavor);
             return new ClipInfo(ClipInfo.TEXT, null, transferData.getBytes("utf-8"));
         } else {
-            System.err.println("getImageFromClipboard: That wasn't an image!");
+            System.err.println("not support type");
         }
         return null;
     }
