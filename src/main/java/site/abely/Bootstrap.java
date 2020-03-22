@@ -60,7 +60,7 @@ public class Bootstrap {
         SystemTray tray = SystemTray.getSystemTray();
 
         //If the icon is a file
-        Image image = Toolkit.getDefaultToolkit().createImage("icon.png");
+        Image image = Toolkit.getDefaultToolkit().createImage("resources/Clipboard.png");
         //Alternative (if the icon is on the classpath):
         //Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource("icon.png"));
 
