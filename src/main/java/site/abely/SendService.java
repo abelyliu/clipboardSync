@@ -9,12 +9,14 @@ import java.nio.ByteBuffer;
 
 public class SendService {
 
+    public static String host = "";
 
     public void send(ClipInfo info) {
 
 //        SocketAddress socketAddress = new InetSocketAddress("192.168.5.88", 9997);
 //        SocketAddress socketAddress = new InetSocketAddress("192.168.106.122", 9997);
-        SocketAddress socketAddress = new InetSocketAddress("192.168.5.48", 9997);
+        SocketAddress socketAddress = new InetSocketAddress(host, 9997);
+//        SocketAddress socketAddress = new InetSocketAddress("192.168.5.31", 9997);
         try {
             Socket socket = new Socket();
             socket.connect(socketAddress);

@@ -2,7 +2,6 @@ package site.abely;
 
 import com.tulskiy.keymaster.common.HotKeyListener;
 import com.tulskiy.keymaster.common.Provider;
-import dorkbox.notify.Notify;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -16,19 +15,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static dorkbox.notify.Pos.TOP_RIGHT;
-
 public class Bootstrap {
-    public static void main(String[] args) throws AWTException {
-        Bootstrap td = new Bootstrap();
-        td.displayTray();
-
-//        new Thread(new SocketServer()).start();
+    public static void main(String[] args) {
+        UDPClient.run();
+        UDPServer.run();
         new Thread(new SocketFileServer()).start();
         final Provider provider = Provider.getCurrentProvider(true);
         HotKeyListener listener = hotKey -> {
@@ -54,38 +48,14 @@ public class Bootstrap {
         provider.register(KeyStroke.getKeyStroke("alt C"), listener);
     }
 
-
-    public void displayTray() throws AWTException {
-        //Obtain only one instance of the SystemTray object
-        SystemTray tray = SystemTray.getSystemTray();
-
-        //If the icon is a file
-        Image image = Toolkit.getDefaultToolkit().createImage("resources/Clipboard.png");
-        //Alternative (if the icon is on the classpath):
-        //Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource("icon.png"));
-
-        TrayIcon trayIcon = new TrayIcon(image, "Tray Demo");
-        //Let the system resize the image if needed
-        trayIcon.setImageAutoSize(true);
-        //Set tooltip text for the tray icon
-        trayIcon.setToolTip("System tray icon demo");
-        tray.add(trayIcon);
-
-        trayIcon.displayMessage("Hello, World", "notification demo", TrayIcon.MessageType.INFO);
-    }
-
     public static ClipInfo getImageFromClipboard() throws IOException, UnsupportedFlavorException, ClassNotFoundException {
 
         Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
         if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
             DataFlavor[] transferDataFlavors = transferable.getTransferDataFlavors();
-            for (DataFlavor transferDataFlavor : transferDataFlavors) {
-                System.out.println(transferDataFlavors + ":" + transferable.getTransferData(transferDataFlavor));
-            }
             java.util.List<File> filePath = (java.util.List<File>) transferable.getTransferData((DataFlavor.javaFileListFlavor));
             System.out.println("file path is " + filePath);
 
-//            String filePath = (String) transferable.getTransferData(DataFlavor.stringFlavor);
             byte[] bytes = Files.readAllBytes(filePath.get(0).toPath());
             return new ClipInfo(ClipInfo.FILE, filePath.get(0).toPath().getFileName().toString(), bytes);
         } else if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
