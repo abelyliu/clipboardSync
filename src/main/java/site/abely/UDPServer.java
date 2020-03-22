@@ -33,14 +33,12 @@ public class UDPServer {
                             sbuf.append((char) buf[i]);
                         }
                         if (sbuf.toString().equals(UDPClient.message1)) {
-                            if (!SendService.host.equals(address.getHostAddress())) {
-                                SendService.host = address.getHostAddress();
-                                DatagramSocket ds1 = new DatagramSocket();
-                                DatagramPacket dp1 = new DatagramPacket(UDPClient.message2.getBytes("UTF-8"),
-                                        UDPClient.message2.length(), address, port);
-                                ds1.send(dp1);
-                                ds1.close();
-                            }
+                            SendService.host = address.getHostAddress();
+                            DatagramSocket ds1 = new DatagramSocket();
+                            DatagramPacket dp1 = new DatagramPacket(UDPClient.message2.getBytes("UTF-8"),
+                                    UDPClient.message2.length(), address, port);
+                            ds1.send(dp1);
+                            ds1.close();
                         } else if (sbuf.toString().equals(UDPClient.message2)) {
                             SendService.host = address.getHostAddress();
                         }
