@@ -6,17 +6,28 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SendService {
 
     public static String host = "";
 
     public void send(ClipInfo info) {
+        if (host.equals("")) {
+            try {
+                List<String> strings = Files.readAllLines(Paths.get(System.getProperty("user.home") + "/.clipConf"));
+                String collect = strings.stream().collect(Collectors.joining());
+                host = collect;
+            } catch (IOException e) {
+                System.out.println("在用户目录下建.clipConf文件");
+                return;
+            }
 
-//        SocketAddress socketAddress = new InetSocketAddress("192.168.5.88", 9997);
-//        SocketAddress socketAddress = new InetSocketAddress("192.168.106.122", 9997);
+        }
         SocketAddress socketAddress = new InetSocketAddress(host, 9997);
-//        SocketAddress socketAddress = new InetSocketAddress("192.168.5.31", 9997);
         try {
             Socket socket = new Socket();
             socket.connect(socketAddress);

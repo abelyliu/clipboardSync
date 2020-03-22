@@ -21,8 +21,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Bootstrap {
     public static void main(String[] args) {
-        UDPClient.run(UDPClient.message1);
-        UDPServer.run();
+//        UDPClient.run(UDPClient.message1);
+//        UDPServer.run();
         new Thread(new SocketFileServer()).start();
         final Provider provider = Provider.getCurrentProvider(true);
         HotKeyListener listener = hotKey -> {
