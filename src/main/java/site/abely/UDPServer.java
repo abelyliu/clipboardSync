@@ -12,6 +12,7 @@ public class UDPServer {
             int port = 9997;//开启监听的端口
             DatagramSocket ds = null;
             DatagramPacket dp = null;
+            System.out.println("监听广播端口打开：");
             while (true) {
                 byte[] buf = new byte[1024];//存储发来的消息
                 StringBuffer sbuf = new StringBuffer();
@@ -20,7 +21,6 @@ public class UDPServer {
                     //绑定端口的
                     ds = new DatagramSocket(port);
                     dp = new DatagramPacket(buf, buf.length);
-                    System.out.println("监听广播端口打开：");
                     ds.receive(dp);
                     ds.close();
                     InetAddress address = dp.getAddress();
@@ -34,6 +34,7 @@ public class UDPServer {
                         }
                         if (sbuf.toString().equals(UDPClient.message)) {
                             SendService.host = address.getHostAddress();
+                            UDPClient.run();
                         }
                     }
 

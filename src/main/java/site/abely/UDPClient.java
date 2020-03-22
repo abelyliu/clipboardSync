@@ -9,7 +9,7 @@ public class UDPClient {
     public static void run() {
         // 广播的实现 :由客户端发出广播，服务器端接收
         String host = "255.255.255.255";//广播地址
-        int port = 9999;//广播的目的端口
+        int port = 9997;//广播的目的端口
         try {
             InetAddress adds = InetAddress.getByName(host);
             DatagramSocket ds = new DatagramSocket();
