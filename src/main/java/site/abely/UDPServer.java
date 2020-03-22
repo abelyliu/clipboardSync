@@ -35,12 +35,8 @@ public class UDPServer {
                         if (sbuf.toString().equals(UDPClient.message1)) {
                             SendService.host = address.getHostAddress();
                             System.out.println("message1="+SendService.host);
-
-                            DatagramSocket ds1 = new DatagramSocket();
-                            DatagramPacket dp1 = new DatagramPacket(UDPClient.message2.getBytes("UTF-8"),
-                                    UDPClient.message2.length(), address, port);
-                            ds1.send(dp1);
-                            ds1.close();
+                            Thread.sleep(1000);
+                            UDPClient.run(UDPClient.message2);
                         } else if (sbuf.toString().equals(UDPClient.message2)) {
                             SendService.host = address.getHostAddress();
                             System.out.println("message2="+SendService.host);
@@ -50,6 +46,8 @@ public class UDPServer {
                 } catch (SocketException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
