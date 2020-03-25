@@ -69,7 +69,7 @@ public class SocketFileServer implements Runnable {
                     int contentSize = ByteBuffer.wrap(contentLengthInfo).asIntBuffer().get();
                     byte[] contentInfo = new byte[contentSize];
                     in.readFully(contentInfo);
-                    Files.write(Paths.get("C:\\Users\\abely\\Desktop\\" + name), contentInfo, StandardOpenOption.CREATE_NEW);
+                    Files.write(Paths.get(System.getProperty("user.home")+"/" + name), contentInfo, StandardOpenOption.CREATE_NEW);
                     NotificationUtil.notification("消息", "接收到文件消息");
                 }
                 System.out.println("接收消息完成");
