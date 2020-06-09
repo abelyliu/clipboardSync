@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.LocalTime;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -26,7 +27,7 @@ public class Bootstrap {
         new Thread(new SocketFileServer()).start();
         final Provider provider = Provider.getCurrentProvider(true);
         HotKeyListener listener = hotKey -> {
-            System.out.println(Thread.currentThread().getId());
+            System.out.println(LocalTime.now() + "");
             ClipInfo imageFromClipboard = null;
             try {
                 imageFromClipboard = getImageFromClipboard();
@@ -55,6 +56,7 @@ public class Bootstrap {
             return new ClipInfo(ClipInfo.FILE, filePath.get(0).toPath().getFileName().toString(), bytes);
         } else if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
             BufferedImage image = getImage((Image) transferable.getTransferData(DataFlavor.imageFlavor));
+            System.out.println(LocalTime.now());
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ImageIO.write(image, "png", byteArrayOutputStream);
             return new ClipInfo(ClipInfo.IMAGE, null, byteArrayOutputStream.toByteArray());

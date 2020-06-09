@@ -8,6 +8,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,7 @@ public class SendService {
             int type = info.getType();
             byte[] typeInfo = ByteBuffer.allocate(1).put((byte) type).array();
             byte[] contentLength = ByteBuffer.allocate(4).putInt(info.getContent().length).array();
+            System.out.println(LocalTime.now()+"start send");
             if (type == ClipInfo.TEXT || type == ClipInfo.IMAGE) {
                 outputStream.write(typeInfo);
                 outputStream.write(contentLength);
@@ -51,7 +53,7 @@ public class SendService {
             outputStream.flush();
             outputStream.close();
             socket.close();
-            System.out.println("send success");
+            System.out.println(LocalTime.now()+"send success");
         } catch (IOException e) {
             e.printStackTrace();
         }
