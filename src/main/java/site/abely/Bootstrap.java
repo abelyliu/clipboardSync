@@ -14,7 +14,6 @@ import java.awt.image.ImageObserver;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.time.LocalTime;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -52,8 +51,11 @@ public class Bootstrap {
         if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
             java.util.List<File> filePath = (java.util.List<File>) transferable.getTransferData((DataFlavor.javaFileListFlavor));
             System.out.println("file path is " + filePath);
-            byte[] bytes = Files.readAllBytes(filePath.get(0).toPath());
-            return new ClipInfo(ClipInfo.FILE, filePath.get(0).toPath().getFileName().toString(), bytes);
+//            File file = filePath.get(0);
+//            long length = file.length();
+//            byte[] bytes = Files.readAllBytes(filePath.get(0).toPath());
+//            System.out.println(bytes.length== ((int) (length)));
+            return new ClipInfo(ClipInfo.FILE, filePath.get(0), null);
         } else if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
             BufferedImage image = getImage((Image) transferable.getTransferData(DataFlavor.imageFlavor));
             System.out.println(LocalTime.now());

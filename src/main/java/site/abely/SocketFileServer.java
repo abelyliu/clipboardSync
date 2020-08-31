@@ -64,12 +64,22 @@ public class SocketFileServer implements Runnable {
                     in.readFully(nameInfo);
                     String name = new String(nameInfo, "utf-8");
                     System.out.println("file name is " + name);
-                    byte[] contentLengthInfo = new byte[4];
+                    byte[] contentLengthInfo = new byte[8];
                     in.readFully(contentLengthInfo);
-                    int contentSize = ByteBuffer.wrap(contentLengthInfo).asIntBuffer().get();
-                    byte[] contentInfo = new byte[contentSize];
-                    in.readFully(contentInfo);
-                    Files.write(Paths.get(System.getProperty("user.home")+"/" + name), contentInfo, StandardOpenOption.CREATE_NEW);
+                    long contentSize = ByteBuffer.wrap(contentLengthInfo).asLongBuffer().get();
+                    while (true) {
+                        if (contentSize > 2048) {
+                            byte[] contentInfo = new byte[2048];
+                            in.readFully(contentInfo);
+                            contentSize -= 2048;
+                            Files.write(Paths.get(System.getProperty("user.home") + "/" + name), contentInfo, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+                        } else {
+                            byte[] contentInfo = new byte[((int) (contentSize))];
+                            in.readFully(contentInfo);
+                            Files.write(Paths.get(System.getProperty("user.home") + "/" + name), contentInfo, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+                            break;
+                        }
+                    }
                     NotificationUtil.notification("消息", "接收到文件消息");
                 }
                 System.out.println("接收消息完成");

@@ -1,7 +1,6 @@
 package site.abely;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -35,22 +34,30 @@ public class SendService {
             OutputStream outputStream = socket.getOutputStream();
             int type = info.getType();
             byte[] typeInfo = ByteBuffer.allocate(1).put((byte) type).array();
-            byte[] contentLength = ByteBuffer.allocate(4).putInt(info.getContent().length).array();
             System.out.println(LocalTime.now()+"start send");
             if (type == ClipInfo.TEXT || type == ClipInfo.IMAGE) {
+                byte[] contentLength = ByteBuffer.allocate(4).putInt(info.getContent().length).array();
                 outputStream.write(typeInfo);
                 outputStream.write(contentLength);
                 outputStream.write(info.getContent());
             } else if (type == ClipInfo.FILE) {
-                byte[] fileNameInfo = info.getFileName().getBytes("utf-8");
+                File file = info.getFile();
+                byte[] fileNameInfo = file.getName().getBytes("utf-8");
                 byte[] fileNameLength = ByteBuffer.allocate(4).putInt(fileNameInfo.length).array();
+                byte[] contentLength = ByteBuffer.allocate(8).putLong(file.length()).array();
                 outputStream.write(typeInfo);
                 outputStream.write(fileNameLength);
                 outputStream.write(fileNameInfo);
                 outputStream.write(contentLength);
-                outputStream.write(info.getContent());
+
+                InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+                byte[] buffer = new byte[4096];
+                while (inputStream.read(buffer) != -1) {
+                    outputStream.write(buffer);
+                    outputStream.flush();
+                }
+
             }
-            outputStream.flush();
             outputStream.close();
             socket.close();
             System.out.println(LocalTime.now()+"send success");

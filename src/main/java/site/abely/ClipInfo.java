@@ -1,5 +1,7 @@
 package site.abely;
 
+import java.io.File;
+
 public class ClipInfo {
     public static final int TEXT = 0;
     public static final int IMAGE = 1;
@@ -7,12 +9,12 @@ public class ClipInfo {
 
 
     private int type;
-    private String fileName;
+    private File file;
     private byte[] content;
 
-    public ClipInfo(int type, String fileName, byte[] content) {
+    public ClipInfo(int type, File file, byte[] content) {
         this.type = type;
-        this.fileName = fileName;
+        this.file = file;
         this.content = content;
     }
 
@@ -24,12 +26,12 @@ public class ClipInfo {
         this.type = type;
     }
 
-    public String getFileName() {
-        return fileName;
+    public File getFile() {
+        return file;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setFile(File file) {
+        this.file = file;
     }
 
     public byte[] getContent() {
