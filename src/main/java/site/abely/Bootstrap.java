@@ -14,6 +14,7 @@ import java.awt.image.ImageObserver;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -21,9 +22,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Bootstrap {
     public static void main(String[] args) {
+        //如果开启了代理，会导致发送udp广播失败，因为场景是局域网内传输，所以这里强制不使用代理
+        System.setProperty("http.proxyHost", "");
+        System.setProperty("http.proxyPort", "");
         UDPClient.run(UDPClient.message1);
         UDPServer.run();
         new Thread(new SocketFileServer()).start();
+        //这里
         final Provider provider = Provider.getCurrentProvider(true);
         HotKeyListener listener = hotKey -> {
             System.out.println(LocalTime.now() + "");
@@ -64,7 +69,7 @@ public class Bootstrap {
             return new ClipInfo(ClipInfo.IMAGE, null, byteArrayOutputStream.toByteArray());
         } else if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
             String transferData = (String) transferable.getTransferData(DataFlavor.stringFlavor);
-            return new ClipInfo(ClipInfo.TEXT, null, transferData.getBytes("utf-8"));
+            return new ClipInfo(ClipInfo.TEXT, null, transferData.getBytes(StandardCharsets.UTF_8));
         } else {
             System.err.println("not support type");
         }

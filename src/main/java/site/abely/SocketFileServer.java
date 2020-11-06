@@ -68,10 +68,10 @@ public class SocketFileServer implements Runnable {
                     in.readFully(contentLengthInfo);
                     long contentSize = ByteBuffer.wrap(contentLengthInfo).asLongBuffer().get();
                     while (true) {
-                        if (contentSize > 2048) {
-                            byte[] contentInfo = new byte[2048];
+                        if (contentSize > 100 * 1024 * 1024) {
+                            byte[] contentInfo = new byte[100 * 1024 * 1024];
                             in.readFully(contentInfo);
-                            contentSize -= 2048;
+                            contentSize -= (100 * 1024 * 1024);
                             Files.write(Paths.get(System.getProperty("user.home") + "/" + name), contentInfo, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
                         } else {
                             byte[] contentInfo = new byte[((int) (contentSize))];
