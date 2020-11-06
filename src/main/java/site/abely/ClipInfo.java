@@ -1,6 +1,8 @@
 package site.abely;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class ClipInfo {
     public static final int TEXT = 0;
@@ -40,5 +42,22 @@ public class ClipInfo {
 
     public void setContent(byte[] content) {
         this.content = content;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ClipInfo clipInfo = (ClipInfo) o;
+        return type == clipInfo.type &&
+                Objects.equals(file, clipInfo.file) &&
+                Arrays.equals(content, clipInfo.content);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(type, file);
+        result = 31 * result + Arrays.hashCode(content);
+        return result;
     }
 }

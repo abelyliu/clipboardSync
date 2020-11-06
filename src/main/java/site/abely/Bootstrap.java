@@ -6,9 +6,7 @@ import com.tulskiy.keymaster.common.Provider;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.datatransfer.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.ByteArrayOutputStream;
@@ -31,24 +29,30 @@ public class Bootstrap {
         //这里
         final Provider provider = Provider.getCurrentProvider(true);
         HotKeyListener listener = hotKey -> {
-            System.out.println(LocalTime.now() + "");
-            ClipInfo imageFromClipboard = null;
-            try {
-                imageFromClipboard = getImageFromClipboard();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (UnsupportedFlavorException e) {
-                e.printStackTrace();
-            }
-            if (imageFromClipboard == null) {
-                System.err.println("not support type");
-            }
-            SendService sendService = new SendService();
-            sendService.send(imageFromClipboard);
+            send();
         };
         //加下面这一行是mac os的问题，加上之后会在dock里面出现个java进程，挺尬的
         Toolkit.getDefaultToolkit();
         provider.register(KeyStroke.getKeyStroke("alt C"), listener);
+        Clipboard systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        systemClipboard.addFlavorListener(e -> send());
+    }
+
+    private static void send() {
+        System.out.println(LocalTime.now() + "");
+        ClipInfo imageFromClipboard = null;
+        try {
+            imageFromClipboard = getImageFromClipboard();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (UnsupportedFlavorException e) {
+            e.printStackTrace();
+        }
+        if (imageFromClipboard == null) {
+            System.err.println("not support type");
+        }
+        SendService sendService = new SendService();
+        sendService.send(imageFromClipboard);
     }
 
     public static ClipInfo getImageFromClipboard() throws IOException, UnsupportedFlavorException {
