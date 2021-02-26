@@ -50,10 +50,26 @@ public class SocketFileServer implements Runnable {
                     NotificationUtil.notification("消息", "接收到文本图片消息完成");
 
                     if (type == ClipInfo.TEXT) {
+                        Bootstrap.listener = false;
                         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(new String(contentInfo, "utf-8")), null);
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        Bootstrap.listener = true;
+
                     } else if (type == ClipInfo.IMAGE) {
                         BufferedImage image = ImageIO.read(new ByteArrayInputStream(contentInfo));
+                        Bootstrap.listener = false;
                         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new ImageTransferable(image), null);
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        Bootstrap.listener = true;
+
                     }
 
                 } else if (type == ClipInfo.FILE) {

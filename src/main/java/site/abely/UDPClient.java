@@ -16,6 +16,9 @@ public class UDPClient {
             DatagramSocket ds = new DatagramSocket();
             DatagramPacket dp = new DatagramPacket(message.getBytes(),
                     message.length(), adds, port);
+            //连续发送三次
+            ds.send(dp);
+            ds.send(dp);
             ds.send(dp);
             ds.close();
         } catch (UnknownHostException e) {

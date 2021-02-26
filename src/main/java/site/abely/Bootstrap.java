@@ -19,6 +19,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Bootstrap {
+    public static boolean listener = true;
+
     public static void main(String[] args) {
         //如果开启了代理，会导致发送udp广播失败，因为场景是局域网内传输，所以这里强制不使用代理
         System.setProperty("http.proxyHost", "");
@@ -39,6 +41,7 @@ public class Bootstrap {
     }
 
     private static void send() {
+        if (!listener) return;
         System.out.println(LocalTime.now() + "");
         ClipInfo imageFromClipboard = null;
         try {
